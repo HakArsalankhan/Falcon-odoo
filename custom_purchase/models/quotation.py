@@ -9,15 +9,15 @@ class FalconQuotation(models.Model):
     quotation_date = fields.Date (string="Quotation Date")
     #customer info
     customer = fields.Many2one('res.partner', string="Customer")
-    contact_person_customer = fields.Many2one('res.partner', string="Contact Person")
-    title_customer = fields.Char(string="Title")
-    email_customer = fields.Char(string="Email")
-    mobile_customer = fields.Char(string="Mobile")
+    contact_person_customer = fields.Many2one('res.partner', string="Customer Contact Person")
+    title_customer = fields.Char(string="Customer Title")
+    email_customer = fields.Char(string="Customer Email")
+    mobile_customer = fields.Char(string="Customer Mobile")
     #company info
-    contact_person_company = fields.Many2one('res.partner', string="Contact Person")
-    title_company = fields.Char(string="Title")
-    email_company = fields.Char(string="Email")
-    mobile_company = fields.Char(string="Mobile")
+    contact_person_company = fields.Many2one('res.partner', string="Company Contact Person")
+    title_company = fields.Char(string="Company Title")
+    email_company = fields.Char(string="Company Email")
+    mobile_company = fields.Char(string="Company Mobile")
     #other info
     terms_and_conditions = fields.Text(string="Terms and Conditions")
     notes = fields.Text(string="Notes")
