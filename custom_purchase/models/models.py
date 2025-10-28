@@ -70,7 +70,7 @@ class PurchaseRequest(models.Model):
             rec.amount_tax = taxes
             rec.amount_total = untaxed + taxes
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         # Auto-create HR employee if new
         if vals.get('is_new_employee') and not vals.get('requested_by_id'):
