@@ -39,7 +39,7 @@
                     <group string="Request Info" col="2">
                         <!-- Left Column -->
                         <group>
-                            <field name="pr_ref" readonly="1"/>
+                            <field name="pr_ref"/>
                             <field name="requested_by_id"/>
                             <field name="to_department_id"/>
                         </group>

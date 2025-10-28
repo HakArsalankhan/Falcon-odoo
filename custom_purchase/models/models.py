@@ -70,21 +70,6 @@ class PurchaseRequest(models.Model):
             rec.amount_tax = taxes
             rec.amount_total = untaxed + taxes
 
-    @api.model_create_multi
-    def create(self, vals):
-        # Auto-create HR employee if new
-        if vals.get('is_new_employee') and not vals.get('requested_by_id'):
-            employee_name = vals.get('employee_name') or 'New Employee'
-            new_emp = self.env['hr.employee'].create({
-                'name': employee_name,
-                'job_id': vals.get('title_id'),
-                'work_email': vals.get('email'),
-                'work_phone': vals.get('mobile'),
-            })
-            vals['requested_by_id'] = new_emp.id
-
-        return super(PurchaseRequest, self).create(vals)
-
     def write(self, vals):
         """Update linked Employee when email/mobile/title change."""
         res = super(PurchaseRequest, self).write(vals)
