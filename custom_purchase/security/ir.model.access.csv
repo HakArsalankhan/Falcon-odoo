@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_purchase_request_user,access.purchase.request.user,model_purchase_request,base.group_user,1,1,1,1
+access_purchase_request_line_user,access.purchase.request.line.user,model_purchase_request_line,base.group_user,1,1,1,1
+access_quotations_user,access.quotations.user,model_quotations,base.group_user,1,1,1,1
+access_quotation_line_user,access.quotation.line.user,model_quotation_line,base.group_user,1,1,1,1
