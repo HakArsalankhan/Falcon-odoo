@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from datetime import date
-
 
 class PurchaseRequest(models.Model):
     _name = 'purchase.request'
@@ -9,11 +7,16 @@ class PurchaseRequest(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'pr_ref'
 
-    pr_ref = fields.Char(string="PR Ref", readonly=True, copy=False)
+    pr_ref = fields.Char(string="PR Ref")  # simple editable text
     date = fields.Date(string="Date", default=fields.Date.today)
+
     requested_by_id = fields.Many2one('hr.employee', string="Requested By")
-    title_id = fields.Many2one('hr.job', string="Title", related='requested_by_id.job_id', store=True)
-    email = fields.Char(string="Email", related='requested_by_id.work_email', store=True)
+
+    # Editable fallback fields for new employees
+    title_id = fields.Many2one('hr.job', string="Requester Title")
+    email = fields.Char(string="Requester Email")
+    mobile = fields.Char(string="Requester Mobile")
+
     to_department_id = fields.Many2one('hr.department', string="To Department")
 
     serving_client = fields.Char(string="Serving Client")
@@ -32,24 +35,28 @@ class PurchaseRequest(models.Model):
     amount_untaxed = fields.Monetary(string="Untaxed Amount", compute='_compute_amounts', store=True)
     amount_tax = fields.Monetary(string="Taxes", compute='_compute_amounts', store=True)
     amount_total = fields.Monetary(string="Total", compute='_compute_amounts', store=True)
-    currency_id = fields.Many2one('res.currency', string='Currency',
-                                  default=lambda self: self.env.company.currency_id.id)
+
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency',
+        default=lambda self: self.env.company.currency_id.id
+    )
     company_id = fields.Many2one(
-        'res.company',
-        string='Company',
-        required=True,
+        'res.company', string='Company', required=True,
         default=lambda self: self.env.company.id
     )
     notes = fields.Char(string="Notes")
 
-    @api.depends('order_line_ids.price_subtotal', 'order_line_ids.taxes_id', 'order_line_ids.product_qty',
-                 'order_line_ids.price_unit')
+    is_new_employee = fields.Boolean(string="Is New Employee", default=False)
+
+    # --------------------------
+    # COMPUTE + ONCHANGE LOGIC
+    # --------------------------
+
+    @api.depends('order_line_ids.price_subtotal', 'order_line_ids.taxes_id', 'order_line_ids.product_qty', 'order_line_ids.price_unit')
     def _compute_amounts(self):
         for rec in self:
-            untaxed = 0.0
-            taxes = 0.0
+            untaxed = taxes = 0.0
             for line in rec.order_line_ids:
-                # Compute taxes using Odoo's built-in function
                 tax_data = line.taxes_id.compute_all(
                     line.price_unit,
                     rec.currency_id,
@@ -59,24 +66,58 @@ class PurchaseRequest(models.Model):
                 )
                 untaxed += tax_data['total_excluded']
                 taxes += tax_data['total_included'] - tax_data['total_excluded']
-
             rec.amount_untaxed = untaxed
             rec.amount_tax = taxes
             rec.amount_total = untaxed + taxes
 
     @api.model
     def create(self, vals):
-        if not vals.get('pr_ref'):
-            last_pr = self.search([], order='id desc', limit=1)
-            next_number = 1
-            if last_pr and last_pr.pr_ref:
-                try:
-                    last_num = int(last_pr.pr_ref.split('-')[-1])
-                    next_number = last_num + 1
-                except Exception:
-                    pass
-            vals['pr_ref'] = 'FSC-PR-' + str(next_number).zfill(4)
-        return super().create(vals)
+        # Auto-create HR employee if new
+        if vals.get('is_new_employee') and not vals.get('requested_by_id'):
+            employee_name = vals.get('employee_name') or 'New Employee'
+            new_emp = self.env['hr.employee'].create({
+                'name': employee_name,
+                'job_id': vals.get('title_id'),
+                'work_email': vals.get('email'),
+                'work_phone': vals.get('mobile'),
+            })
+            vals['requested_by_id'] = new_emp.id
+
+        return super(PurchaseRequest, self).create(vals)
+
+    def write(self, vals):
+        """Update linked Employee when email/mobile/title change."""
+        res = super(PurchaseRequest, self).write(vals)
+        for rec in self:
+            emp = rec.requested_by_id
+            if not emp:
+                continue
+            if rec.is_new_employee:
+                update_emp = {}
+                if 'email' in vals and rec.email != emp.work_email:
+                    update_emp['work_email'] = rec.email
+                if 'mobile' in vals and rec.mobile != emp.work_phone:
+                    update_emp['work_phone'] = rec.mobile
+                if 'title_id' in vals and rec.title_id != emp.job_id:
+                    update_emp['job_id'] = rec.title_id.id
+                if update_emp:
+                    emp.sudo().write(update_emp)
+        return res
+
+    @api.onchange('requested_by_id')
+    def _onchange_requested_by_id(self):
+        """Auto-fill or allow manual entry depending on whether employee exists."""
+        for rec in self:
+            if rec.requested_by_id:
+                rec.is_new_employee = False
+                rec.title_id = rec.requested_by_id.job_id.id
+                rec.email = rec.requested_by_id.work_email
+                rec.mobile = rec.requested_by_id.work_phone
+            else:
+                rec.is_new_employee = True
+                rec.title_id = False
+                rec.email = False
+                rec.mobile = False
 
 
 class PurchaseRequestLine(models.Model):
@@ -94,8 +135,7 @@ class PurchaseRequestLine(models.Model):
     product_qty = fields.Float(string="Quantity", default=1.0)
     product_uom = fields.Many2one('uom.uom', string="Unit of Measure")
     price_unit = fields.Float(string="Unit Price with VAT")
-    taxes_id = fields.Many2many('account.tax', string="Taxes",
-                                domain="[('type_tax_use','=','purchase')]")
+    taxes_id = fields.Many2many('account.tax', string="Taxes", domain="[('type_tax_use','=','purchase')]")
     price_subtotal = fields.Monetary(string="Subtotal", compute='_compute_subtotal', store=True)
     currency_id = fields.Many2one('res.currency', related='request_id.currency_id', store=True)
     company_id = fields.Many2one('res.company', related='request_id.company_id', store=True)
