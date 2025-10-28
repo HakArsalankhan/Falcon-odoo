@@ -38,16 +38,14 @@ class FalconQuotation(models.Model):
             record.vat_amount = vat
             record.total_with_vat = total + vat
     # # --- Auto populate from selected Customer ---
-    # @api.onchange('contact_person_customer')
-    # def _onchange_customer(self):
-    #     if self.contact_person_customer:
-    #         self.email_customer = self.contact_person_customer.email
-    #         self.mobile_customer = self.contact_person_customer.mobile
-    #         self.title_customer = self.contact_person_customer.title and self.contact_person_customer.title.name or False
-    #     else:
-    #         self.email_customer = False
-    #         self.mobile_customer = False
-    #         self.title_customer = False
+    @api.onchange('contact_person_customer')
+    def _onchange_customer(self):
+        if self.contact_person_customer:
+            self.email_customer = self.contact_person_customer.email
+            self.mobile_customer = self.contact_person_customer.mobile
+        else:
+            self.email_customer = False
+            self.mobile_customer = False
 
     # # --- Auto populate from selected Company ---
     @api.onchange('contact_person_company')
@@ -55,11 +53,9 @@ class FalconQuotation(models.Model):
         if self.contact_person_company:
             self.email_company = self.contact_person_company.email
             self.mobile_company = self.contact_person_company.mobile
-            self.title_company = self.contact_person_company.title and self.contact_person_company.title.name or False
         else:
             self.email_company = False
             self.mobile_company = False
-            self.title_company = False
 
 
 class QuotationLine(models.Model):
