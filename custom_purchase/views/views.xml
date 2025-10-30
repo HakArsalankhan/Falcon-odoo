@@ -1,7 +1,7 @@
 <odoo>
     <!-- Menu + Action -->
     <menuitem id="menu_falcon_pr_root"
-              name="Falcon PR"
+              name="Falcon Purchase"
               parent="purchase.menu_purchase_root"
               sequence="5"
     />
