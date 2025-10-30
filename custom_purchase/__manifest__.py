@@ -20,7 +20,8 @@ Long description of module's purpose
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'views/quotation.xml'
+        'views/quotation.xml',
+        'views/purchase_order.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
