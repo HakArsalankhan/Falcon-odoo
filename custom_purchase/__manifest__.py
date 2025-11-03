@@ -22,6 +22,8 @@ Long description of module's purpose
         'views/templates.xml',
         'views/quotation.xml',
         'views/purchase_order.xml',
+        'views/delivery_note.xml',
+        'views/rfq.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
