@@ -10,10 +10,10 @@ class PurchaseOrder(models.Model):
     mobile_1 = fields.Char(string='Mobile')
 
     # Contact Person fields for Column 2
-    contact_person_2_id = fields.Many2one('hr.employee', string='Vendor Contact Person')
-    title_2_id = fields.Many2one('hr.job', string=' Vendor Title')
-    email_2 = fields.Char(string='Vendor Email')
-    mobile_2 = fields.Char(string='Vendor Mobile')
+    contact_person_2_id = fields.Many2one('hr.employee', string="Vendor's Contact Person")
+    title_2_id = fields.Many2one('hr.job', string="Vendor's Title")
+    email_2 = fields.Char(string="Vendor's Email")
+    mobile_2 = fields.Char(string="Vendor's Mobile")
 
     @api.onchange('contact_person_1_id')
     def _onchange_contact_person_1_id(self):

@@ -13,8 +13,6 @@ class FalconDeliveryNote(models.Model):
     delivered_to = fields.Char(string="Delivered To")
     buyer_name = fields.Many2one('res.partner', string="Buyer Name")
     buyer_email = fields.Char(string="Buyer Email")
-    customer_notes = fields.Char(string="Notes To Customer")
-    delivery_terms = fields.Char(string="Delivery Terms")
     customer_notes_line_ids = fields.One2many(
         'delivery.customer.notes.line', 'delivery_note_id', string="Customer Notes"
     )
