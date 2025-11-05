@@ -1,41 +1,33 @@
 from odoo import models, fields, api, _
 from datetime import date
 
+
 class PurchaseRequest(models.Model):
     _name = 'purchase.request'
     _description = 'Purchase Request'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'pr_ref'
 
-    pr_ref = fields.Char(string="PR Ref")  # simple editable text
+    pr_ref = fields.Char(string="PR Ref")
     date = fields.Date(string="Date", default=fields.Date.today)
-
     requested_by_id = fields.Many2one('hr.employee', string="Requested By")
-
-    # Editable fallback fields for new employees
     title_id = fields.Many2one('hr.job', string="Requester Title")
     email = fields.Char(string="Requester Email")
     mobile = fields.Char(string="Requester Mobile")
-
     to_department_id = fields.Many2one('hr.department', string="To Department")
-
     serving_client = fields.Char(string="Serving Client")
     po_project = fields.Char(string="PO/Project")
-
     to_be_purchased_by_id = fields.Many2one('hr.employee', string="To Be Purchased By")
-    to_title_id = fields.Many2one('hr.job', string="Title", related='to_be_purchased_by_id.job_id', store=True)
-    to_email = fields.Char(string="Email", related='to_be_purchased_by_id.work_email', store=True)
-    to_mobile = fields.Char(string="Mobile", related='to_be_purchased_by_id.work_phone', store=True)
-
+    to_title_id = fields.Many2one('hr.job', string="Title")
+    to_email = fields.Char(string="Email")
+    to_mobile = fields.Char(string="Mobile")
     vendor_id = fields.Many2one('res.partner', string="Vendor", domain="[('supplier_rank', '>', 0)]")
     vendor_ref = fields.Char(string="Vendor ID")
-
     order_line_ids = fields.One2many('purchase.request.line', 'request_id', string="Product Lines")
 
     amount_untaxed = fields.Monetary(string="Untaxed Amount", compute='_compute_amounts', store=True)
     amount_tax = fields.Monetary(string="Taxes", compute='_compute_amounts', store=True)
     amount_total = fields.Monetary(string="Total", compute='_compute_amounts', store=True)
-
     currency_id = fields.Many2one(
         'res.currency', string='Currency',
         default=lambda self: self.env.company.currency_id.id
@@ -45,14 +37,11 @@ class PurchaseRequest(models.Model):
         default=lambda self: self.env.company.id
     )
     notes = fields.Char(string="Notes")
-
     is_new_employee = fields.Boolean(string="Is New Employee", default=False)
 
-    # --------------------------
     # COMPUTE + ONCHANGE LOGIC
-    # --------------------------
-
-    @api.depends('order_line_ids.price_subtotal', 'order_line_ids.taxes_id', 'order_line_ids.product_qty', 'order_line_ids.price_unit')
+    @api.depends('order_line_ids.price_subtotal', 'order_line_ids.taxes_id', 'order_line_ids.product_qty',
+                 'order_line_ids.price_unit')
     def _compute_amounts(self):
         for rec in self:
             untaxed = taxes = 0.0
@@ -103,6 +92,21 @@ class PurchaseRequest(models.Model):
                 rec.title_id = False
                 rec.email = False
                 rec.mobile = False
+
+    @api.onchange('to_be_purchased_by_id')
+    def _onchange_to_be_purchased_by_id(self):
+        """Auto-fill purchase contact fields when employee is selected, but keep them editable."""
+        for rec in self:
+            if rec.to_be_purchased_by_id:
+                # Auto-fill the values, but user can still edit them manually
+                rec.to_title_id = rec.to_be_purchased_by_id.job_id.id
+                rec.to_email = rec.to_be_purchased_by_id.work_email
+                rec.to_mobile = rec.to_be_purchased_by_id.work_phone
+            else:
+                # Clear the fields if no employee is selected
+                rec.to_title_id = False
+                rec.to_email = False
+                rec.to_mobile = False
 
 
 class PurchaseRequestLine(models.Model):

@@ -10,14 +10,10 @@ class PurchaseOrder(models.Model):
     # --------------------------
     vendor_no = fields.Char(string="Vendor No")
     vendor_contact = fields.Char(string="Vendor Contact")
-    vendor_phone = fields.Char(string="Vendor Phone", related='partner_id.phone', readonly=True)
-    vendor_email = fields.Char(string="Vendor Email", related='partner_id.email', readonly=True)
-    vendor_address_display = fields.Html(string="Vendor Address", compute="_compute_vendor_address_display")
-
-    def _compute_vendor_address_display(self):
-        for record in self:
-            partner = record.partner_id
-            record.vendor_address_display = partner._display_address(without_company=True) if partner else ""
+    # CHANGED: Remove related and readonly to make them editable
+    vendor_phone = fields.Char(string="Vendor Phone")  # Removed related and readonly
+    vendor_email = fields.Char(string="Vendor Email")  # Removed related and readonly
+    vendor_address_display = fields.Html(string="Vendor Address")
 
     # --------------------------
     # Shipping Details (Employee-based)
@@ -28,24 +24,10 @@ class PurchaseOrder(models.Model):
         help="Employee responsible for shipping",
         ondelete="set null"
     )
-    ship_phone = fields.Char(string="Ship Phone", compute="_compute_ship_info", store=True)
-    ship_email = fields.Char(string="Ship Email", compute="_compute_ship_info", store=True)
+    ship_phone = fields.Char(string="Ship Phone")
+    ship_email = fields.Char(string="Ship Email")
     ship_to = fields.Many2one('res.company', string="Ship To", default=lambda self: self.env.company)
-    ship_address_display = fields.Html(string="Shipping Address", compute="_compute_ship_address_display")
-
-    @api.depends('ship_employee_id')
-    def _compute_ship_info(self):
-        for rec in self:
-            emp = rec.ship_employee_id
-            rec.ship_phone = emp.work_phone if emp else ""
-            rec.ship_email = emp.work_email if emp else ""
-
-    def _compute_ship_address_display(self):
-        for record in self:
-            company = record.ship_to
-            record.ship_address_display = (
-                company.partner_id._display_address(without_company=True) if company else ""
-            )
+    ship_address_display = fields.Html(string="Shipping Address")
 
     # --------------------------
     # Billing Details (Employee-based)
@@ -56,21 +38,74 @@ class PurchaseOrder(models.Model):
         help="Employee responsible for billing",
         ondelete="set null"
     )
-    bill_phone = fields.Char(string="Bill Phone", compute="_compute_bill_info", store=True)
-    bill_email = fields.Char(string="Bill Email", compute="_compute_bill_info", store=True)
+    bill_phone = fields.Char(string="Bill Phone")
+    bill_email = fields.Char(string="Bill Email")
     bill_to = fields.Many2one('res.company', string="Bill To", default=lambda self: self.env.company)
-    bill_address_display = fields.Html(string="Billing Address", compute="_compute_bill_address_display")
+    bill_address_display = fields.Html(string="Billing Address")
 
-    @api.depends('bill_employee_id')
-    def _compute_bill_info(self):
+    # --------------------------
+    # Onchange methods for auto-fill with manual editing capability
+    # --------------------------
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        """Auto-fill vendor information when partner is selected, but keep it editable."""
         for rec in self:
-            emp = rec.bill_employee_id
-            rec.bill_phone = emp.work_phone if emp else ""
-            rec.bill_email = emp.work_email if emp else ""
+            if rec.partner_id:
+                # Auto-fill vendor details, but user can still edit them manually
+                rec.vendor_address_display = rec.partner_id._display_address(without_company=True) if rec.partner_id else ""
+                rec.vendor_phone = rec.partner_id.phone or ""
+                rec.vendor_email = rec.partner_id.email or ""
+            else:
+                # Clear the fields if no partner is selected
+                rec.vendor_address_display = ""
+                rec.vendor_phone = ""
+                rec.vendor_email = ""
 
-    def _compute_bill_address_display(self):
-        for record in self:
-            company = record.bill_to
-            record.bill_address_display = (
-                company.partner_id._display_address(without_company=True) if company else ""
-            )
+    @api.onchange('ship_to')
+    def _onchange_ship_to(self):
+        """Auto-fill shipping address when company is selected, but keep it editable."""
+        for rec in self:
+            if rec.ship_to:
+                # Auto-fill the shipping address, but user can still edit it manually
+                rec.ship_address_display = rec.ship_to.partner_id._display_address(without_company=True) if rec.ship_to else ""
+            else:
+                # Clear the field if no company is selected
+                rec.ship_address_display = ""
+
+    @api.onchange('ship_employee_id')
+    def _onchange_ship_employee_id(self):
+        """Auto-fill shipping contact fields when employee is selected, but keep them editable."""
+        for rec in self:
+            if rec.ship_employee_id:
+                # Auto-fill the values, but user can still edit them manually
+                rec.ship_phone = rec.ship_employee_id.work_phone or ""
+                rec.ship_email = rec.ship_employee_id.work_email or ""
+            else:
+                # Clear the fields if no employee is selected
+                rec.ship_phone = ""
+                rec.ship_email = ""
+
+    @api.onchange('bill_to')
+    def _onchange_bill_to(self):
+        """Auto-fill billing address when company is selected, but keep it editable."""
+        for rec in self:
+            if rec.bill_to:
+                # Auto-fill the billing address, but user can still edit it manually
+                rec.bill_address_display = rec.bill_to.partner_id._display_address(without_company=True) if rec.bill_to else ""
+            else:
+                # Clear the field if no company is selected
+                rec.bill_address_display = ""
+
+    @api.onchange('bill_employee_id')
+    def _onchange_bill_employee_id(self):
+        """Auto-fill billing contact fields when employee is selected, but keep them editable."""
+        for rec in self:
+            if rec.bill_employee_id:
+                # Auto-fill the values, but user can still edit them manually
+                rec.bill_phone = rec.bill_employee_id.work_phone or ""
+                rec.bill_email = rec.bill_employee_id.work_email or ""
+            else:
+                # Clear the fields if no employee is selected
+                rec.bill_phone = ""
+                rec.bill_email = ""
