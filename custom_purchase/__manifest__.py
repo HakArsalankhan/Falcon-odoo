@@ -23,7 +23,8 @@ Long description of module's purpose
         'views/quotation.xml',
         'views/purchase_order.xml',
         'views/delivery_note.xml',
-        'views/rfq.xml'
+        'views/rfq.xml',
+        'views/purchase_order_line_view.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
