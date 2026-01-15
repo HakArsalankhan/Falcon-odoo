@@ -1,0 +1,185 @@
+<odoo>
+    <data>
+        <template id="report_journal_entry">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page" style="padding: 15px; page-break-inside: avoid;">
+                            <!-- Header Section -->
+                            <div style="margin-bottom: 15px; text-align: center;">
+                                <h1 style="color: #87CEEB; margin: 0 0 5px 0; font-size: 24px; font-weight: 700;">Journal Entry Report</h1>
+                                <p style="color: #6c757d; margin: 0; font-size: 14px;">
+                                    <t t-esc="doc.name or 'Draft Entry'"/>
+                                </p>
+                            </div>
+
+                            <!-- Journal Entry Information - Simple Table -->
+                            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px; width: 30%; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Entry Name:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.name or 'Draft'"/></td>
+                                    </tr>
+                                    <tr t-if="doc.ref">
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Reference:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.ref"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Accounting Date:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Journal:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.journal_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.partner_id">
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Partner:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.partner_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">State:</td>
+                                        <td style="padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                                            <span t-if="doc.state == 'draft'" style="background: #6c757d; color: white; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: 600;">Draft</span>
+                                            <span t-if="doc.state == 'posted'" style="background: #28a745; color: white; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: 600;">Posted</span>
+                                            <span t-if="doc.state == 'cancel'" style="background: #dc3545; color: white; padding: 3px 10px; border-radius: 15px; font-size: 11px; font-weight: 600;">Cancelled</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="doc.move_type != 'entry'">
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Move Type:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.move_type"/></td>
+                                    </tr>
+                                    <tr t-if="doc.currency_id and doc.currency_id != doc.company_currency_id">
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500; border-bottom: 1px solid #f0f0f0;">Currency:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600; border-bottom: 1px solid #f0f0f0;"><t t-esc="doc.currency_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.company_id">
+                                        <td style="padding: 8px; color: #6c757d; font-weight: 500;">Company:</td>
+                                        <td style="padding: 8px; color: #212529; font-weight: 600;"><t t-esc="doc.company_id.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Journal Items Section with Advanced Styling -->
+                            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; page-break-inside: avoid;">
+                                <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea;">
+                                    <h2 style="margin: 0; color: #212529; font-size: 20px; font-weight: 700;">Journal Items</h2>
+                                </div>
+                                
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #ffffff;">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Account
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Partner
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Label
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Analytic Distribution
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Debit
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Credit
+                                                </th>
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Tax Grids
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-set="total_debit" t-value="0"/>
+                                            <t t-set="total_credit" t-value="0"/>
+                                            <t t-set="row_index" t-value="0"/>
+                                            <t t-foreach="doc.get_report_lines()" t-as="line">
+                                                <t t-set="row_index" t-value="row_index + 1"/>
+                                                <t t-set="row_bg" t-value="line.get_row_background_color(row_index)"/>
+                                                <t t-set="debit_color" t-value="line.get_debit_color()"/>
+                                                <t t-set="credit_color" t-value="line.get_credit_color()"/>
+                                                <tr style="transition: all 0.3s ease;">
+                                                    <td t-attf-style="padding: 10px; color: #212529; border-bottom: 1px solid #e9ecef; background-color: #{row_bg};">
+                                                        <div style="display: flex; align-items: center;">
+                                                            <div style="width: 6px; height: 6px; background: #667eea; border-radius: 50%; margin-right: 8px;"></div>
+                                                            <span style="font-weight: 600; color: #495057; font-size: 13px;">
+                                                                <t t-esc="line.account_id.code"/> - <t t-esc="line.account_id.name"/>
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; color: #6c757d; border-bottom: 1px solid #e9ecef; background-color: #{row_bg}; font-size: 13px;">
+                                                        <t t-esc="line.partner_id.name if line.partner_id else '-'"/>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; color: #6c757d; border-bottom: 1px solid #e9ecef; background-color: #{row_bg}; font-size: 13px;">
+                                                        <t t-esc="line.name or '-'"/>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; color: #6c757d; border-bottom: 1px solid #e9ecef; background-color: #{row_bg}; font-size: 12px;">
+                                                        <t t-if="line.get_analytic_distribution_display()">
+                                                            <span style="background: #e3f2fd; color: #1976d2; padding: 3px 6px; border-radius: 3px; font-size: 10px; font-weight: 500;">
+                                                                <t t-esc="line.get_analytic_distribution_display()"/>
+                                                            </span>
+                                                        </t>
+                                                        <t t-if="not line.get_analytic_distribution_display()">-</t>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; text-align: right; border-bottom: 1px solid #e9ecef; background-color: #{row_bg};">
+                                                        <span t-attf-style="font-weight: 600; color: #{debit_color}; font-size: 13px;">
+                                                            <t t-esc="doc.format_amount(line.debit, doc.company_currency_id)"/>
+                                                        </span>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; text-align: right; border-bottom: 1px solid #e9ecef; background-color: #{row_bg};">
+                                                        <span t-attf-style="font-weight: 600; color: #{credit_color}; font-size: 13px;">
+                                                            <t t-esc="doc.format_amount(line.credit, doc.company_currency_id)"/>
+                                                        </span>
+                                                    </td>
+                                                    <td t-attf-style="padding: 10px; color: #6c757d; border-bottom: 1px solid #e9ecef; background-color: #{row_bg}; font-size: 12px;">
+                                                        <t t-if="line.get_tax_grids_display()">
+                                                            <span style="background: #fff3cd; color: #856404; padding: 3px 6px; border-radius: 3px; font-size: 10px; font-weight: 500;">
+                                                                <t t-esc="line.get_tax_grids_display()"/>
+                                                            </span>
+                                                        </t>
+                                                        <t t-if="not line.get_tax_grids_display()">-</t>
+                                                    </td>
+                                                </tr>
+                                                <t t-set="total_debit" t-value="total_debit + line.debit"/>
+                                                <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                                            </t>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-top: 2px solid #667eea;">
+                                                <td colspan="4" style="padding: 12px 10px; font-weight: 700; color: #212529; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                    Total
+                                                </td>
+                                                <td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #28a745; font-size: 14px;">
+                                                    <t t-esc="doc.format_amount(total_debit, doc.company_currency_id)"/>
+                                                </td>
+                                                <td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #dc3545; font-size: 14px;">
+                                                    <t t-esc="doc.format_amount(total_credit, doc.company_currency_id)"/>
+                                                </td>
+                                                <td style="padding: 12px 10px; font-weight: 700; color: #212529;"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Narration/Notes Section -->
+                            <div t-if="doc.narration" style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; page-break-inside: avoid;">
+                                <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #4facfe;">
+                                    <h2 style="margin: 0; color: #212529; font-size: 18px; font-weight: 700;">Notes</h2>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #4facfe;">
+                                    <div style="color: #495057; line-height: 1.6; font-size: 13px;">
+                                        <t t-raw="doc.narration"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
