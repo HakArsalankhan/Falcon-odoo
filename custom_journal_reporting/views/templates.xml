@@ -3,7 +3,7 @@
         <template id="report_journal_entry">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="doc">
-                    <t t-call="web.external_layout">
+                    <t t-call="web.basic_layout">
                         <div class="page" style="padding: 15px; page-break-inside: avoid;">
                             <!-- Header Section -->
                             <div style="margin-bottom: 15px; text-align: center;">
@@ -66,28 +66,28 @@
                                 </div>
                                 
                                 <div style="overflow-x: auto;">
-                                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #ffffff;">
+                                    <table style="width: 100%; border-collapse: collapse; background-color: #ffffff;">
                                         <thead>
-                                            <tr>
-                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            <tr style="background: #667eea;">
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Account
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Partner
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Label
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Analytic Distribution
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Debit
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: right; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Credit
                                                 </th>
-                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <th style="padding: 12px 10px; text-align: left; font-weight: 700; color: #ffffff; border-bottom: 2px solid #495057; font-size: 13px;">
                                                     Tax Grids
                                                 </th>
                                             </tr>
