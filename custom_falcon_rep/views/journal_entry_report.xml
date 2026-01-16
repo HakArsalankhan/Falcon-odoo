@@ -49,6 +49,8 @@
                                         <thead>
                                             <tr>
                                                 <th class="text-start">Account</th>
+                                                <th class="text-start">Partner</th>
+                                                <th class="text-start">Label</th>
                                                 <th class="text-start" groups="analytic.group_analytic_accounting">Analytic Distribution</th>
                                                 <th class="text-end">Debit</th>
                                                 <th class="text-end">Credit</th>
@@ -61,10 +63,18 @@
                                                 <tr>
                                                     <td class="text-start">
                                                         <span t-field="line.account_id" t-options="{'widget': 'many2one', 'no_marker': True}"/>
-                                                        <t t-if="line.name">
-                                                            <br/>
-                                                            <small class="text-muted" t-field="line.name" t-options="{'widget': 'text'}"/>
+                                                    </td>
+                                                    <td class="text-start">
+                                                        <t t-if="line.partner_id">
+                                                            <span t-field="line.partner_id" t-options="{'widget': 'many2one', 'no_marker': True}"/>
                                                         </t>
+                                                        <t t-else="">-</t>
+                                                    </td>
+                                                    <td class="text-start">
+                                                        <t t-if="line.name">
+                                                            <span t-field="line.name" t-options="{'widget': 'text'}"/>
+                                                        </t>
+                                                        <t t-else="">-</t>
                                                     </td>
                                                     <td class="text-start" groups="analytic.group_analytic_accounting">
                                                         <t t-if="line.analytic_distribution">
@@ -97,8 +107,8 @@
                                         </tbody>
                                         <tfoot>
                                             <tr class="fw-bold">
-                                                <td class="text-end" groups="analytic.group_analytic_accounting" colspan="2">Total:</td>
-                                                <td class="text-end" groups="!analytic.group_analytic_accounting" colspan="1">Total:</td>
+                                                <td class="text-end" groups="analytic.group_analytic_accounting" colspan="4">Total:</td>
+                                                <td class="text-end" groups="!analytic.group_analytic_accounting" colspan="3">Total:</td>
                                                 <td class="text-end">
                                                     <t t-set="total_debit" t-value="sum([l.debit for l in filtered_lines])"/>
                                                     <span t-out="total_debit" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
